@@ -263,6 +263,12 @@
 
 ### Android ###
 
+- Additional logging for web API errors
+
+## Android v1.3.3 ##
+
+### Android ###
+
 - Fix for connection issues with Android 2.2 (Move to HTTP)
 
 ## Android v1.4beta1 ##
