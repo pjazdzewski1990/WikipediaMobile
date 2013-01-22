@@ -25,7 +25,7 @@ l10n.navigatorLang = function(success) {
 }
 
 function getAboutVersionString() {
-	return "1.3.3";
+	return "1.3.4";
 }
 
 (function() {
