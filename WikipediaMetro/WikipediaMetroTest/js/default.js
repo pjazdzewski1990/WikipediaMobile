@@ -274,6 +274,13 @@
                     }
                     promise.then(function (langlinks) {
                         var div = document.createElement('div');
+                        if (langlinks.length == 0) {
+                            var button = document.createElement('button'),
+                                command = new WinJS.UI.MenuCommand(button, {
+                                    label: mw.msg('win8-no-langlinks')
+                                });
+                            div.appendChild(button);
+                        }
                         langlinks.forEach(function (langlink) {
                             var lang = langlink.lang,
                                 target = langlink.target,
@@ -326,7 +333,7 @@
                     // Have to disable app-wide search to input here
                     Windows.ApplicationModel.Search.SearchPane.getForCurrentView().showOnKeyboardInput = false;
                     range = document.body.createTextRange();
-                    // @fixme make a range only within the content area
+                    range.moveToElementText(reader);
                     range.collapse();
                     $('#find-input').focus();
                 });
@@ -376,13 +383,15 @@
                     var langlinks = [];
                     if (data.query && data.query.pages) {
                         $.each(data.query.pages, function (i, page) {
-                            page.langlinks.forEach(function (link) {
-                                langlinks.push({
-                                    lang: link.lang,
-                                    target: link['*'],
-                                    title: link['*']
+                            if (page.langlinks) {
+                                page.langlinks.forEach(function (link) {
+                                    langlinks.push({
+                                        lang: link.lang,
+                                        target: link['*'],
+                                        title: link['*']
+                                    });
                                 });
-                            });
+                            }
                         });
                     }
                     complete(langlinks);
@@ -532,7 +541,8 @@
         if (typeof html !== 'string') {
             throw new Error('must be string');
         }
-        //return html.replace(/<[^>]+>/g, ''); // fixme put in real html parser
+        // Strip any JS first for safety
+        html = toStaticHTML(html);
         return $('<div>').html(html).text();
     }
 
@@ -703,15 +713,31 @@
             request.data.properties.title = title + ' - Wikipedia';
             request.data.properties.description = 'Link to Wikipedia article'; // @fixme l10n
         } else {
-            // Active selection; send the text.
+            // Active selection;
             var range = selection.getRangeAt(0);
             var fragment = range.cloneContents();
+
+            // Add text to the data package
             var text = $(fragment).text();
             request.data.setText(text);
+
+            // Add html to the data package
+            var div = document.createElement("div");
+            div.appendChild(fragment);
+            share.expandURLs(div, baseUrl(state.current().lang), articleUrl(state.current().lang, title));
+            var cfhtml = Windows.ApplicationModel.DataTransfer.HtmlFormatHelper.createHtmlFormat(div.outerHTML);
+            request.data.setHtmlFormat(cfhtml);
             request.data.properties.title = 'Content from ' + title + ' - Wikipedia';
             request.data.properties.description = 'Text from Wikipedia article'; // @fixme l10n
         }
     });
+
+    function baseUrl(lang) {
+        if (typeof lang != 'string') {
+            throw new Error('bad lang input to articleUrl');
+        }
+        return 'https://' + lang + '.wikipedia.org';
+      }
 
     function articleUrl(lang, title) {
         if (typeof title != 'string') {
@@ -764,25 +790,22 @@
     }
 
     function insertWikiHtml(target, html) {
-        // hack for protocol-relative images (unsafe)
         if (typeof html !== "string") {
             throw new Error('we got a non-string');
         }
-        html = html.replace(/"\/\/upload\.wikimedia\.org/g, '"https://upload.wikimedia.org');
-        var $div = $('<div>');
-        MSApp.execUnsafeLocalFunction(function () {
-            $div.append(html);
-        });
-        /*
+        // Strip any JavaScript that might have made it in.
+        // Some will be harmless bits from MediaWiki, but it's safer to kill them.
+        html = toStaticHTML(html);
+        var $div = $('<div>').append(html);
+
         $div.find('img').each(function () {
-            // hack for protocol-relative images
+            // fixup for protocol-relative images
             var $img = $(this),
                 src = $img.attr('src');
             if (src.substr(0, 2) == '//') {
                 $img.attr('src', 'https:' + src);
             }
         });
-        */
         $div.find('table').each(function () {
             var $table = $(this);
             var $embedded = $table.parent().closest('table');
@@ -844,6 +867,7 @@
         $('#back').hide();
         $('#hub').show();
         $('#offline').hide();
+        $('#find-bar').hide();
         sizeContent();
     }
 
@@ -989,6 +1013,8 @@
                 updateLiveTile(mediaWiki.message('win8-tile-featured-article').plain(), txt);
             }
             htmlList.slice(0, 8).forEach(function (html, index) {
+                // Filter for safety
+                html = toStaticHTML(html);
                 var $html = $('<div>').html(html),
                     $links = $html.find('a'),
                     $imgs = $html.find('img'),
@@ -1039,6 +1065,8 @@
             }
             $('#spinner').hide();
             htmlList.slice(0, 6).forEach(function (html, index) {
+                // Filter for safety
+                html = toStaticHTML(html);
                 var $html = $('<div>').html(html),
                     $links = $html.find('a'),
                     $imgs = $html.find('img'),
@@ -1126,7 +1154,8 @@
                 nErrors++;
             }
             if (htmlList.length) {
-                var html = htmlList[0],
+                // Filter for safety
+                var html = toStaticHTML(htmlList[0]),
                     $html = $('<div>').html(html),
                     $lis = $html.find('li');
                 $lis.each(function () {
