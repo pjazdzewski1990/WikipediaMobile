@@ -122,7 +122,7 @@ window.app = function() {
 	}
 
 	function baseUrlForLanguage(lang) {
-		return window.PROTOCOL + '://' + lang + '.' + PROJECTNAME + '.org';
+		return window.PROTOCOL + '://' + lang + '.m.' + PROJECTNAME + '.org';
 	}
 
 	function makeCanonicalUrl(lang, title) {
