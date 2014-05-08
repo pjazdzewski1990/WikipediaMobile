@@ -24,7 +24,10 @@ window.CREDITS = [
 
 function init() {
 	$(document.body).addClass('jsEnabled');
-	document.addEventListener("deviceready", function() {chrome.initialize(); }, true);
+	document.addEventListener("deviceready", function() {
+        chrome.initialize(); 
+        Ash.loadTests(["test/ash/wikitest.js"]);
+    }, true);
 }
 
 function aboutPage() {

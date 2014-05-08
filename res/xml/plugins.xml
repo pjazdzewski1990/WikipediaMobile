@@ -46,4 +46,7 @@
     <plugin name="GlobalizationCommand" value="com.phonegap.plugins.globalization.GlobalizationCommand"/>
     <plugin name="WebIntent" value="com.borismus.webintent.WebIntent"/>
     <plugin name="Preferences" value="org.wikipedia.PreferencesPlugin"/>
+    
+    <!-- Ash -->
+    <plugin name="Ash" value="pl.ug.ash.AshPlugin"/>
 </plugins>
