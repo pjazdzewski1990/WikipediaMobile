@@ -68,19 +68,19 @@ public class AshPlugin extends Plugin {
         return new PluginResult(PluginResult.Status.ERROR, ex.toString());
       }  
     }
-//    if (ACTION_NETWORK_OFF.equals(action)) {
-//      try {
-//        Log.d("HelloPlugin", "Blocking access to network");
-//        
-//        return setNetworkConnectivity(false/*, callbackContext*/);
-////        return true;
-//      }
-//      catch (Exception ex) {
-//        Log.d("AshPlugin error:", ex.toString());
-////        callbackContext.error(ex.toString());
-//        return new PluginResult(PluginResult.Status.ERROR, ex.toString());
-//      }  
-//    }
+    if (ACTION_NETWORK_OFF.equals(action)) {
+      try {
+        Log.d("HelloPlugin", "Blocking access to network");
+        
+        return turnNetworkOff();
+//        return true;
+      }
+      catch (Exception ex) {
+        Log.d("AshPlugin error:", ex.toString());
+//        callbackContext.error(ex.toString());
+        return new PluginResult(PluginResult.Status.ERROR, ex.toString());
+      }  
+    }
 //    if (ACTION_NETWORK_ON.equals(action)) {
 //      try {
 //        Log.d("HelloPlugin", "Enabling network");
@@ -151,28 +151,29 @@ public class AshPlugin extends Plugin {
 //      turnNetworkOff(callbackContext);
 //    }
 //  }
-//    
-//  private void turnNetworkOff(final CallbackContext callbackContext) {
-//    final CordovaWebView cordovaWebView = this.webView;
-//          
-//    //working on UI thread ...
+    
+  private PluginResult turnNetworkOff() {
+    final CordovaWebView cordovaWebView = this.webView;
+          
+    //working on UI thread ...
 //    cordova.getActivity().runOnUiThread(new Runnable() {
 //      public void run() {
-//        // set the alternative web view client, that does nothing ...
-//        cordovaWebView.setWebViewClient(new WebViewClient() {
-//          @Override
-//          public void onLoadResource(WebView view, String url) {
-//            System.out.println("CUSTOM - load aborted");
-//            view.stopLoading();
-//          }
-//        });
-//        // trigger the event ...
-//        //cordovaWebView.setNetworkAvailable(false);
-//        // and call the test
+        // set the alternative web view client, that does nothing ...
+        cordovaWebView.setWebViewClient(new WebViewClient() {
+          @Override
+          public void onLoadResource(WebView view, String url) {
+            System.out.println("CUSTOM - load aborted");
+            view.stopLoading();
+          }
+        });
+        // trigger the event ...
+        //cordovaWebView.setNetworkAvailable(false);
+        // and call the test
 //        callbackContext.success(""); // Thread-safe.
 //      }
 //    });
-//  }
+        return new PluginResult(PluginResult.Status.OK, ""); 
+  }
 //    
 //  private void turnNetworkOn(final CallbackContext callbackContext) {
 //    final CordovaWebView cordovaWebView = this.webView;
