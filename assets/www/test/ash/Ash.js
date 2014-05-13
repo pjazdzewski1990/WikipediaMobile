@@ -691,7 +691,4 @@ var Ash = {
 module.exports = Ash;
 */
 window.Log = Log;
-alert("Log imported! " + window.Log.data);
 window.Ash = Ash;
-alert("Ash imported! " + window.Ash.configuration);
-alert("Is AshPromise imported? " + window.AshPromise);
